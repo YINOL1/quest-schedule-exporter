@@ -34,4 +34,36 @@
     ];
 
     let currentCourseTitle = "Unknown";
+    let currentComponent = "";
+    let currentTime = "";
+    let currentRoom = "";
+    let expectRoom = false;
+
+    // Searching and Extracting Schedule Information
+    lines.forEach((line) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return;
+
+        if (expectRoom) {
+            currentRoom = trimmedLine;
+            expectRoom = false;
+            return;
+        }
+
+        if (trimmedLine.includes(' - ') && !trimmedLine.includes(':') && !trimmedLine.includes('AM') && !trimmedLine.includes('PM')) {
+            currentCourseTitle = trimmedLine.split(' - ')[0].trim();
+        }
+        else if (["LEC", "TUT", "LAB", "TST", "SEM"].includes(trimmedLine)) {
+            currentComponent = trimmedLine;
+        }
+        else if ((trimmedLine.includes('AM') || trimmedLine.includes('PM')) && trimmedLine.includes(':')) {
+            currentTime = trimmedLine;
+            expectRoom = true;
+        }
+        else if(/\d{4}\/\d{2}\/\d{2} - \d{4}\/\d{2}\/\d{2}/.test(trimmedLine)) {
+            const dates = trimmedLine;
+            if (currentTime.includes("TBA") || dates.includes("TBA")) return;
+        }
+    })
+
 })();
