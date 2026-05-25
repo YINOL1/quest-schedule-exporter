@@ -1,0 +1,82 @@
+/* Global */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Main Card */
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 600px;
+}
+
+h1 {
+    margin-top: 0;
+    color: #333;
+}
+
+p {
+    color: #666;
+    line-height: 1.5;
+}
+
+textarea {
+    width: 100%;
+    height: 250px;
+    margin: 15px 0;
+    padding: 12px;
+    font-family: monospace;
+    box-sizing: border-box;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    resize: vertical;
+}
+
+textarea:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Buttons */
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.secondary-btn {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+.secondary-btn:hover {
+    background-color: #cbd5e1;
+}
+
+.primary-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+.primary-btn:hover {
+    background-color: #0056b3;
+}
