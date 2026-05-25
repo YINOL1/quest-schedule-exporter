@@ -68,13 +68,27 @@ function generateICS(rawInput) {
                 rruleDays = rruleDays.slice(0, -1);
             }
 
-            const dtStart = formatDateTime(startDateStr, startTimeStr);
-            const dtEnd = formatDateTime(startDateStr, endTimeStr);
+            const [sYear, sMonth, sDay] = startDateStr.split('/');
+            let actualStartObj = new Date(sYear, sMonth - 1, sDay);
+            const dayMap = {"SU":0, "MO":1, "TU":2, "WE":3, "TH":4, "FR":5, "SA":6};
+            const allowedDays = rruleDays.split(',').map(d => dayMap[d]);
+
+            while (!allowedDays.includes(actualStartObj.getDay())) {
+                actualStartObj.setDate(actualStartObj.getDate() + 1);
+            }
+
+            const safeStartYear = actualStartObj.getFullYear();
+            const safeStartMonth = String(actualStartObj.getMonth() + 1).padStart(2, '0');
+            const safeStartDay = String(actualStartObj.getDate()).padStart(2, '0');
+            const safeStartDateStr = `${safeStartYear}/${safeStartMonth}/${safeStartDay}`;
+
+            const dtStart = formatDateTime(safeStartDateStr, startTimeStr);
+            const dtEnd = formatDateTime(safeStartDateStr, endTimeStr);
 
             const [eYear, eMonth, eDay] = endDateStr.split('/');
             const endObj = new Date(eYear, eMonth - 1, eDay);
             endObj.setDate(endObj.getDate() + 1);
-            
+
             const safeYear = endObj.getFullYear();
             const safeMonth = String(endObj.getMonth() + 1).padStart(2, '0');
             const safeDay = String(endObj.getDate()).padStart(2, '0');
