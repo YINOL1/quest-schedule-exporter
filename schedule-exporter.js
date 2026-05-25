@@ -1,4 +1,4 @@
-(function main() {
+function generateICS(rawInput) {
     // Converting Quest Date Time Format into .ics
     function formatDateTime(dateStr, timeStr) {
         const [year, month, day] = dateStr.split('/');
@@ -14,13 +14,6 @@
         }
 
         return `${year}${month.padStart(2, '0')}${day.padStart(2, '0')}T${String(hour).padStart(2, '0')}${minute.padStart(2, '0')}00`;
-    }
-
-    // Paste and Slice into Lines
-    const rawInput = prompt("Copy and Paste the entire 'List View' page under 'Class Schedule' in Quest here:");
-    if (!rawInput) {
-        alert("No text detected. Exiting program.");
-        return;
     }
 
     const lines = rawInput.split('\n');
@@ -101,15 +94,5 @@ END:VEVENT`;
 
     icsContent.push("END:VCALENDAR");
 
-    //Download .ics File
-    const finalICSString = icsContent.join('\n');
-    const blob = new Blob([finalICSString], { type: 'text/calendar' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Schedule.ics';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-})();
+    return icsContent.join('\n');
+}
