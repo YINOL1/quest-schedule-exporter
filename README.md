@@ -2,7 +2,7 @@
 
 A lightweight and fast web application designed for University of Waterloo students to instantly convert their Quest class schedules into a universal `.ics` calendar file to Google Calendar, Apple Calendar, or Outlook.
 
-Check out the live website here: <a href="https://yinol1.github.io/schedule-exporter/" target="_blank">Quest Schedule Exporter</a> 
+Check out the live website here: <a href="https://yinol1.github.io/quest-schedule-exporter/" target="_blank">Quest Schedule Exporter</a> 
 
 ## ✨ Features
 * **100% Private:** Your data never leaves your computer. All parsing and processing happen locally inside your web browser (no databases, no analytics, no external servers).
