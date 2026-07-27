@@ -19,6 +19,7 @@ function generateICS(rawInput) {
     const now = new Date();
     const dtStamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
+    rawInput = rawInput.replace(/\t/g, '\n').replace(/[–—]/g, '-');
     const lines = rawInput.split('\n');
 
     // Initiate .ics Content
@@ -63,16 +64,22 @@ let icsContent = [
             return;
         }
 
-        if (/\d{4}\/\d{2}\/\d{2} - \d{4}\/\d{2}\/\d{2}/.test(trimmedLine)) {
-            const dates = trimmedLine;
-            if (currentTime.includes("TBA") || dates.includes("TBA")) return;
+        const dateMatch = trimmedLine.match(/(\d{4}\/\d{2}\/\d{2})\s*-\s*(\d{4}\/\d{2}\/\d{2})/);
+        
+        if (dateMatch) {
+            if (currentTime.includes("TBA") || trimmedLine.includes("TBA")) return;
 
             //Insert Schedule in .ics File
             const timeParts = currentTime.split(' ');
             const daysString = timeParts[0]; 
             const timeRange = currentTime.replace(daysString, '').trim();
-            const [startTimeStr, endTimeStr] = timeRange.split(' - ');
-            const [startDateStr, endDateStr] = dates.split(' - ');
+            
+            const timeSplit = timeRange.split(/\s*-\s*/);
+            if (timeSplit.length < 2) return; 
+            const [startTimeStr, endTimeStr] = timeSplit;
+            
+            const startDateStr = dateMatch[1];
+            const endDateStr = dateMatch[2];
 
             let rruleDays = daysString
                 .replace(/Th/g, "th,")
@@ -93,8 +100,10 @@ let icsContent = [
             const dayMap = {"SU":0, "MO":1, "TU":2, "WE":3, "TH":4, "FR":5, "SA":6};
             const allowedDays = rruleDays.split(',').map(d => dayMap[d]);
 
-            while (!allowedDays.includes(actualStartObj.getDay())) {
+            let loopGuard = 0;
+            while (!allowedDays.includes(actualStartObj.getDay()) && loopGuard < 7) {
                 actualStartObj.setDate(actualStartObj.getDate() + 1);
+                loopGuard++;
             }
 
             const safeStartYear = actualStartObj.getFullYear();
