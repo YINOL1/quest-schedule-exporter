@@ -1,6 +1,7 @@
 function generateICS(rawInput) {
     // Converting Quest Date Time Format into .ics
     function formatDateTime(dateStr, timeStr) {
+        timeStr = timeStr.replace(/\s+/g, '');
         const [year, month, day] = dateStr.split('/');
 
         let [time, modifier] = [timeStr.slice(0,-2), timeStr.slice(-2)];
@@ -21,11 +22,28 @@ function generateICS(rawInput) {
     const lines = rawInput.split('\n');
 
     // Initiate .ics Content
-    let icsContent = [
+let icsContent = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
         "PRODID:-//Quest Schedule Exporter//EN",
-        "CALSCALE:GREGORIAN"
+        "CALSCALE:GREGORIAN",
+        "BEGIN:VTIMEZONE",
+        "TZID:America/Toronto",
+        "BEGIN:DAYLIGHT",
+        "TZOFFSETFROM:-0500",
+        "TZOFFSETTO:-0400",
+        "DTSTART:19700308T020000",
+        "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU",
+        "TZNAME:EDT",
+        "END:DAYLIGHT",
+        "BEGIN:STANDARD",
+        "TZOFFSETFROM:-0400",
+        "TZOFFSETTO:-0500",
+        "DTSTART:19701101T020000",
+        "RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU",
+        "TZNAME:EST",
+        "END:STANDARD",
+        "END:VTIMEZONE"
     ];
 
     let currentCourseTitle = "Unknown";
@@ -62,6 +80,8 @@ function generateICS(rawInput) {
                 .replace(/W/g, "we,")
                 .replace(/M/g, "mo,")
                 .replace(/F/g, "fr,")
+                .replace(/Sa/g, "sa,")
+                .replace(/Su/g, "su,")
                 .toUpperCase();
 
             if (rruleDays.endsWith(",")) {
