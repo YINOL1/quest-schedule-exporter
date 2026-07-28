@@ -14,7 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const finalICSString = generateICS(rawText);
 
-        const blob = new Blob([finalICSString], { type: 'text/calendar' });
+        if (!/BEGIN:VEVENT/.test(finalICSString)) {
+            alert('No calendar events were detected. Please paste the full Quest list view schedule exactly as shown in the List View.');
+            return;
+        }
+
+        const blob = new Blob([finalICSString], { type: 'text/calendar;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         
         const link = document.createElement('a');
@@ -23,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     });
 
     // Clear

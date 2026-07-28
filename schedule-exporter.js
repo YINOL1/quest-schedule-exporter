@@ -16,11 +16,26 @@ function generateICS(rawInput) {
 
         return `${year}${month.padStart(2, '0')}${day.padStart(2, '0')}T${String(hour).padStart(2, '0')}${minute.padStart(2, '0')}00`;
     }
+
+    function normalizeDaysString(daysString) {
+        return daysString
+            .replace(/Su/gi, 'su,')
+            .replace(/Sa/gi, 'sa,')
+            .replace(/Th/gi, 'th,')
+            .replace(/T(?!h)/gi, 'tu,')
+            .replace(/W/gi, 'we,')
+            .replace(/F/gi, 'fr,')
+            .replace(/M/g, 'mo,')
+            .toUpperCase()
+            .replace(/,+/g, ',')
+            .replace(/^,|,$/g, '');
+    }
+
     const now = new Date();
     const dtStamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
     rawInput = rawInput.replace(/\t/g, '\n').replace(/[–—]/g, '-');
-    const lines = rawInput.split('\n');
+    const lines = rawInput.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
 
     // Initiate .ics Content
 let icsContent = [
@@ -64,41 +79,31 @@ let icsContent = [
             return;
         }
 
-        const dateMatch = trimmedLine.match(/(\d{4}\/\d{2}\/\d{2})\s*-\s*(\d{4}\/\d{2}\/\d{2})/);
-        
+        const dateMatch = trimmedLine.match(/(\d{4}\/\d{1,2}\/\d{1,2})\s*-\s*(\d{4}\/\d{1,2}\/\d{1,2})/);
         if (dateMatch) {
-            if (currentTime.includes("TBA") || trimmedLine.includes("TBA")) return;
+            const currentTimeUpper = currentTime.toUpperCase();
+            if (currentTimeUpper.includes("TBA") || trimmedLine.toUpperCase().includes("TBA")) return;
 
-            //Insert Schedule in .ics File
             const timeParts = currentTime.split(' ');
-            const daysString = timeParts[0]; 
+            if (timeParts.length < 2) return;
+
+            const daysString = timeParts[0];
             const timeRange = currentTime.replace(daysString, '').trim();
-            
             const timeSplit = timeRange.split(/\s*-\s*/);
-            if (timeSplit.length < 2) return; 
+            if (timeSplit.length < 2) return;
             const [startTimeStr, endTimeStr] = timeSplit;
-            
+
             const startDateStr = dateMatch[1];
             const endDateStr = dateMatch[2];
 
-            let rruleDays = daysString
-                .replace(/Th/g, "th,")
-                .replace(/T/g, "tu,")
-                .replace(/W/g, "we,")
-                .replace(/M/g, "mo,")
-                .replace(/F/g, "fr,")
-                .replace(/Sa/g, "sa,")
-                .replace(/Su/g, "su,")
-                .toUpperCase();
-
-            if (rruleDays.endsWith(",")) {
-                rruleDays = rruleDays.slice(0, -1);
-            }
+            const rruleDays = normalizeDaysString(daysString);
+            if (!rruleDays) return;
 
             const [sYear, sMonth, sDay] = startDateStr.split('/');
             let actualStartObj = new Date(sYear, sMonth - 1, sDay);
             const dayMap = {"SU":0, "MO":1, "TU":2, "WE":3, "TH":4, "FR":5, "SA":6};
-            const allowedDays = rruleDays.split(',').map(d => dayMap[d]);
+            const allowedDays = rruleDays.split(',').map(d => dayMap[d]).filter(d => d !== undefined);
+            if (!allowedDays.length) return;
 
             let loopGuard = 0;
             while (!allowedDays.includes(actualStartObj.getDay()) && loopGuard < 7) {
@@ -140,16 +145,24 @@ let icsContent = [
             ].join('\r\n');
 
             icsContent.push(eventBlock);
+            return;
         }
-        else if (trimmedLine.includes(' - ') && !trimmedLine.includes(':') && !trimmedLine.includes('AM') && !trimmedLine.includes('PM')) {
+
+        const isCourseTitleLine = trimmedLine.includes(' - ') && !trimmedLine.includes(':') && !/\b(?:AM|PM)\b/i.test(trimmedLine) && !/^\d{4}\/\d{1,2}\/\d{1,2}/.test(trimmedLine);
+        if (isCourseTitleLine) {
             currentCourseTitle = trimmedLine.split(' - ')[0].trim();
+            return;
         }
-        else if (["LEC", "TUT", "LAB", "TST", "SEM"].includes(trimmedLine)) {
+
+        if (["LEC", "TUT", "LAB", "TST", "SEM"].includes(trimmedLine.toUpperCase())) {
             currentComponent = trimmedLine;
+            return;
         }
-        else if ((trimmedLine.includes('AM') || trimmedLine.includes('PM')) && trimmedLine.includes(':')) {
+
+        if (/\b\d{1,2}:\d{2}\s*(?:AM|PM)\b/i.test(trimmedLine)) {
             currentTime = trimmedLine;
             expectRoom = true;
+            return;
         }
     });
 
